@@ -6,14 +6,14 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner })
     .then((card) => {
-      res.send({ data: card });
+      res.status(200).send({ data: card });
     })
     .catch((err) => res.status(400).send({ message: `Произошла ошибка: ${err.message}` }));
 };
 
 module.exports.getCards = (req, res) => {
   Card.find()
-    .then((cards) => res.send(cards))
+    .then((cards) => res.status(200).send(cards))
     .catch((err) => res.status(404).send({ message: `Произошла ошибка: ${err.message}` }));
 };
 
@@ -21,7 +21,7 @@ module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
 
   Card.findByIdAndRemove(cardId)
-    .then((data) => res.send({ data }))
+    .then((data) => res.status(200).send({ data }))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
 };
 

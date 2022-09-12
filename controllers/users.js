@@ -5,13 +5,13 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => res.status(400).send({ message: `Произошла ошибка: ${err.message}` }));
 };
 
 module.exports.getUsers = (req, res) => {
   User.find()
-    .then((users) => res.send(users))
+    .then((users) => res.status(200).send(users))
     .catch((err) => res.status(404).send({ message: `Произошла ошибка: ${err.message}` }));
 };
 
@@ -19,7 +19,7 @@ module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
 
   User.findById(userId)
-    .then((users) => res.send(users))
+    .then((users) => res.status(200).send(users))
     .catch((err) => res.status(404).send({ message: `Произошла ошибка: ${err.message}` }));
 };
 
@@ -29,7 +29,7 @@ module.exports.updateProfile = (req, res) => {
 
   User.findByIdAndUpdate(userId, { name, about })
     .then((user) => {
-      res.send({ data: user });
+      res.status(200).send({ data: user });
     })
     .catch((err) => res.status(400).send({ message: `Произошла ошибка: ${err.message}` }));
 };
@@ -41,7 +41,7 @@ module.exports.updateAvatar = (req, res) => {
   card
     .findByIdAndUpdate(userId, { avatar })
     .then((user) => {
-      res.send({ data: user });
+      res.status(200).send({ data: user });
     })
     .catch((err) => res.status(400).send({ message: `Произошла ошибка: ${err.message}` }));
 };
