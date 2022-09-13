@@ -1,4 +1,5 @@
 const Card = require("../models/card");
+const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require("../app");
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
@@ -8,13 +9,17 @@ module.exports.createCard = (req, res) => {
     .then((card) => {
       res.status(200).send({ data: card });
     })
-    .catch((err) => res.status(400).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => {
+      if (err === "ValidationError") {
+        res.status(ERROR_CODE_400).send({ message: "Некорректные данные" });
+      } else res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" });
+    });
 };
 
 module.exports.getCards = (req, res) => {
   Card.find()
     .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(404).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch(() => res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" }));
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -22,17 +27,41 @@ module.exports.deleteCard = (req, res) => {
 
   Card.findByIdAndRemove(cardId)
     .then((data) => res.status(200).send({ data }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => {
+      if (err === "CastError") {
+        res.status(ERROR_CODE_400).send({ message: "Сервер не может найти запрошенный ресурс" });
+      } else res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" });
+    });
 };
 
-module.exports.likeCard = (req) => Card.findByIdAndUpdate(
+module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $addToSet: { likes: req.user._id } },
-  { new: true }
-);
+  { new: true },
+)
+  .then((user) => {
+    if (!user) {
+      res.status(ERROR_CODE_404).send().send({ message: "Сервер не может найти запрошенный ресурс" });
+    } else res.status(200).send({ message: user });
+  })
+  .catch((err) => {
+    if (err.name === "CastError") {
+      res.status(ERROR_CODE_400).send({ message: "Невалидный id" });
+    } else res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" });
+  });
 
-module.exports.dislikeCard = (req) => Card.findByIdAndUpdate(
+module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } },
-  { new: true }
-);
+  { new: true },
+)
+  .then((user) => {
+    if (!user) {
+      res.status(ERROR_CODE_404).send().send({ message: "Сервер не может найти запрошенный ресурс" });
+    } else res.status(200).send({ message: user });
+  })
+  .catch((err) => {
+    if (err.name === "CastError") {
+      res.status(ERROR_CODE_400).send({ message: "Невалидный id" });
+    } else res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" });
+  });

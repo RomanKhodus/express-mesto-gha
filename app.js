@@ -7,23 +7,29 @@ const routerCards = require("./routes/cards");
 
 process.on("uncaughtException", (err, origin) => {
   console.log(
-    `${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`
+    `${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`,
   );
 });
 
 const { PORT = 3000 } = process.env;
+// eslint-disable-next-line import/prefer-default-export
+export const ERROR_CODE_400 = 400;
+// eslint-disable-next-line import/prefer-default-export
+export const ERROR_CODE_404 = 404;
+// eslint-disable-next-line import/prefer-default-export
+export const ERROR_CODE_500 = 500;
 
 const app = express();
 
 mongoose.connect("mongodb://localhost:27017/mestodb", {
-  useNewUrlParser: true
+  useNewUrlParser: true,
   // useCreateIndex: true,
   // useFindAndModify: false,
 });
 
 app.use((req, res, next) => {
   req.user = {
-    _id: "63193fb8b501026749c32f77"
+    _id: "63193fb8b501026749c32f77",
   };
 
   next();
@@ -32,6 +38,9 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use("/", routerUsers);
 app.use("/", routerCards);
+app.use("/", (req, res) => {
+  res.status(404).send({ message: "Сервер не может найти запрошенный ресурс" });
+});
 
 app.listen(PORT, () => {
   console.log(`Приложение слушает порт: ${PORT}`);
