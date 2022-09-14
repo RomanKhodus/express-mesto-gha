@@ -28,12 +28,12 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        res.status(ERROR_CODE_404).send().send({ message: "Сервер не может найти запрошенный ресурс" });
+        res.status(ERROR_CODE_404).send({ message: "Сервер не может найти запрошенный ресурс" });
       } else res.status(200).send({ card });
     })
     .catch((err) => {
-      if (err === "CastError") {
-        res.status(ERROR_CODE_400).send({ message: "Сервер не может найти запрошенный ресурс" });
+      if (err.name === "CastError") {
+        res.status(ERROR_CODE_400).send({ message: "Невалидный id" });
       } else res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" });
     });
 };
@@ -45,7 +45,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      res.status(ERROR_CODE_404).send().send({ message: "Сервер не может найти запрошенный ресурс" });
+      res.status(ERROR_CODE_404).send({ message: "Сервер не может найти запрошенный ресурс" });
     } else res.status(200).send({ message: card });
   })
   .catch((err) => {
@@ -61,7 +61,7 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
 )
   .then((user) => {
     if (!user) {
-      res.status(ERROR_CODE_404).send().send({ message: "Сервер не может найти запрошенный ресурс" });
+      res.status(ERROR_CODE_404).send({ message: "Сервер не может найти запрошенный ресурс" });
     } else res.status(200).send({ message: user });
   })
   .catch((err) => {

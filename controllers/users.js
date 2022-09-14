@@ -25,7 +25,7 @@ module.exports.getUserById = (req, res) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(ERROR_CODE_404).send().send({ message: "Сервер не может найти запрошенный ресурс" });
+        res.status(ERROR_CODE_404).send({ message: "Сервер не может найти запрошенный ресурс" });
       } else res.status(200).send({ message: user });
     })
     .catch((err) => {
