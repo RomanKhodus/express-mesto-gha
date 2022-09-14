@@ -12,12 +12,6 @@ process.on("uncaughtException", (err, origin) => {
 });
 
 const { PORT = 3000 } = process.env;
-// eslint-disable-next-line import/prefer-default-export
-export const ERROR_CODE_400 = 400;
-// eslint-disable-next-line import/prefer-default-export
-export const ERROR_CODE_404 = 404;
-// eslint-disable-next-line import/prefer-default-export
-export const ERROR_CODE_500 = 500;
 
 const app = express();
 

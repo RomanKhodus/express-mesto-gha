@@ -1,4 +1,4 @@
-name: [![Tests for sprint 13](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-13-sprint.yml)
+name: Tests 13 sprint
 
 on:
   push:
