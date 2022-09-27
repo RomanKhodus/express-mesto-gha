@@ -9,9 +9,10 @@ const {
   setAvatar,
 } = require("../controllers/users");
 
-router.get("users/me", getProfile);
+router.get("/users/me", getProfile);
 
 router.get("/users", getUsers);
+
 router.get("/users/:userId", celebrate({
   params: Joi.object().keys({
     userId: Joi.string().alphanum().length(24),

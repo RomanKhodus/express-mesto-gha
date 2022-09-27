@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const validator = require("validator");
 const User = require("../models/user");
 const NotFoundError = require("../errors/not-found-errors");
 const UnauthorizedError = require("../errors/unauthorized-errors");
@@ -10,6 +11,9 @@ const { ERROR_CODE_500 } = require("../utils/constants");
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
+  if (!validator.isEmail(email)) {
+    return next(new BadRequestError("Некорректные данные"));
+  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, "some-secret-key", { expiresIn: "7d" });
@@ -39,13 +43,12 @@ module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-
-  const regexp = /^(https?:\/\/)?([\w]\.+)\.([a-z]{2,6}\.?)(\/[\w]\.*)*\/?$/;
-  const matchedAvatar = avatar.match(regexp)[0];
-
-  bcrypt.hash(password, 10).then((hash) => {
+  if (!validator.isEmail(req.body.email)) {
+    return next(new BadRequestError("Некорректные данные"));
+  }
+  return bcrypt.hash(password, 10).then((hash) => {
     User.create({
-      name, about, matchedAvatar, email, password: hash,
+      name, about, avatar, email, password: hash,
     })
       .then((user) => res.status(200).send({ data: user }))
       .catch((err) => {
@@ -78,9 +81,9 @@ module.exports.getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        next(new BadRequestError("Некорректные данные"));
+        return next(new BadRequestError("Некорректные данные"));
       }
-      return res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" });
+      return next(err);
     });
 };
 
@@ -101,16 +104,21 @@ module.exports.setProfile = (req, res, next) => {
 };
 
 module.exports.setAvatar = (req, res, next) => {
+  const regexp = /^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/;
+
   const userId = req.user._id;
   const { avatar } = req.body;
-
-  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
+  if (!regexp.test(req.body.avatar)) {
+    throw new BadRequestError("Некорректные данные");
+  }
+  return User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        next(new BadRequestError("Некорректные данные"));
-      } else res.status(ERROR_CODE_500).send({ message: "Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос" });
+        return next(new BadRequestError("Некорректные данные"));
+      }
+      return res.status(500).send("ошибка");
     });
 };
