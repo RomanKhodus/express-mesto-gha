@@ -1,5 +1,5 @@
-const router = require("express").Router();
-const { celebrate, Joi } = require("celebrate");
+const router = require('express').Router();
+const { celebrate, Joi } = require('celebrate');
 
 const {
   getProfile,
@@ -7,28 +7,28 @@ const {
   getUserById,
   setProfile,
   setAvatar,
-} = require("../controllers/users");
+} = require('../controllers/users');
 
-router.get("/users/me", getProfile);
+router.get('/users/me', getProfile);
 
-router.get("/users", getUsers);
+router.get('/users', getUsers);
 
-router.get("/users/:userId", celebrate({
+router.get('/users/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string().alphanum().length(24),
   }),
 }), getUserById);
 
-router.patch("/users/me", celebrate({
+router.patch('/users/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    about: Joi.string().required().min(2),
+    about: Joi.string().required().min(2).max(30),
   }),
 }), setProfile);
 
-router.patch("/users/me/avatar", celebrate({
+router.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string(),
+    avatar: Joi.string().required().pattern(/^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/),
   }),
 }), setAvatar);
 

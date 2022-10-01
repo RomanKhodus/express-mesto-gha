@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -13,11 +13,12 @@ const cardSchema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: 'user',
     required: true,
   },
   likes: {
     type: Array,
+    likesBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     default: [],
   },
   createdAt: {
@@ -26,4 +27,9 @@ const cardSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("card", cardSchema);
+cardSchema.path('link').validate((val) => {
+  const linkRegex = /^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/;
+  return linkRegex.test(val);
+}, 'Неправильная ссылка');
+
+module.exports = mongoose.model('card', cardSchema);
