@@ -87,7 +87,7 @@ module.exports.setProfile = (req, res, next) => {
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        return next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.status(200).send({ data: user });
     })
@@ -106,7 +106,7 @@ module.exports.setAvatar = (req, res, next) => {
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        return next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.status(200).send({ data: user });
     })

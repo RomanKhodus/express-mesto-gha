@@ -60,8 +60,8 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.use('*', (err, req, res, next) => {
-  res.send(next(new NotFoundError('Такой страницы не существует')));
+app.use('/', (req, res) => {
+  res.status(404).send({ message: 'Сервер не может найти запрошенный ресурс' });
 });
 
 app.listen(PORT, () => {
