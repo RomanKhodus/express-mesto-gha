@@ -56,6 +56,6 @@ userSchema.set('toObject', {
 userSchema.path('avatar').validate((val) => {
   const linkRegex = /^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/;
   return linkRegex.test(val);
-}, 'Неправильная ссылка');
+}, 'Не корректные данные');
 
 module.exports = mongoose.model('user', userSchema);

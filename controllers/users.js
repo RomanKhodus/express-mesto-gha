@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-errors');
 const UnauthorizedError = require('../errors/unauthorized-errors');
-const ForbiddenError = require('../errors/forbidden-errors');
 const BadRequestError = require('../errors/bad-request-error');
 const InternalServerError = require('../errors/Internal-server-errors');
+const ConflictError = require('../errors/сonflict-errors');
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -26,7 +26,7 @@ module.exports.getProfile = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        return next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.status(200).send({ message: user });
     })
@@ -43,10 +43,10 @@ module.exports.createUser = (req, res, next) => {
     User.create({
       name, about, avatar, email, password: hash,
     })
-      .then((user) => res.status(200).send({ data: user }))
+      .then((user) => res.status(200).send({ user }))
       .catch((err) => {
         if (err.code === 11000) {
-          next(new ForbiddenError('Такой пользователь уже существует'));
+          next(new ConflictError('Такой пользователь уже существует'));
         }
         if (err.name === 'ValidationError') {
           next(new BadRequestError('Некорректные данные'));
@@ -76,7 +76,7 @@ module.exports.getUserById = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError('Некорректные данные'));
       }
-      return next(err);
+      return next(new InternalServerError('Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос'));
     });
 };
 

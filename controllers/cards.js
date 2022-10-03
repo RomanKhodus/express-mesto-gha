@@ -30,22 +30,27 @@ module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   const ownerId = req.user._id;
 
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('такой карточки нет');
+        return next(new NotFoundError('такой карточки нет'));
       }
       if (card.owner.toString() !== ownerId) {
-        throw new ForbiddenError();
+        return next(new ForbiddenError('недостаточно прав'));
       }
-      return res.status(200).send({ data: card, message: 'карточа успешно удалена' });
+      return Card.findByIdAndDelete(cardId)
+        .then((data) => {
+          res.status(200).send({ data, message: 'карточа успешно удалена' });
+        })
+        .catch(() => {
+          next(new InternalServerError());
+        });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('некорректные данные'));
-        return;
+        return next(new BadRequestError('некорректные данные'));
       }
-      next(new InternalServerError('Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос'));
+      return next(new InternalServerError('Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос'));
     });
 };
 
@@ -56,8 +61,9 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      throw new NotFoundError('такой карточки нет');
-    } else res.status(200).send({ message: card });
+      return next(new NotFoundError('такой карточки нет'));
+    }
+    return res.status(200).send({ message: card });
   })
   .catch((err) => {
     if (err.name === 'CastError') {
@@ -73,7 +79,7 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   .then((user) => {
     if (!user) {
-      throw new NotFoundError('такой карточки нет');
+      return next(new NotFoundError('такой карточки нет'));
     }
     return res.status(200).send({ message: user });
   })
