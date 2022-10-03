@@ -8,7 +8,6 @@ const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const NotFoundError = require('./errors/not-found-errors');
 
 process.on('uncaughtException', (err, origin) => {
   console.log(
