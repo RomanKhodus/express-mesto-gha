@@ -8,6 +8,7 @@ const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/not-found-errors');
 
 process.on('uncaughtException', (err, origin) => {
   console.log(
@@ -59,8 +60,8 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.use('*', (req, res) => {
-  res.status(404).send();
+app.use('*', (err, req, res, next) => {
+  res.send(next(new NotFoundError('Такой страницы не существует')));
 });
 
 app.listen(PORT, () => {
