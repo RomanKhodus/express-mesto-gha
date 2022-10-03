@@ -43,7 +43,7 @@ module.exports.createUser = (req, res, next) => {
     User.create({
       name, about, avatar, email, password: hash,
     })
-      .then((user) => res.status(200).send({ user }))
+      .then((user) => res.status(200).send(user.toObject()))
       .catch((err) => {
         if (err.code === 11000) {
           next(new ConflictError('Такой пользователь уже существует'));
@@ -68,7 +68,7 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        return next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.send(user);
     })

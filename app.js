@@ -59,6 +59,10 @@ app.use((err, req, res, next) => {
   next();
 });
 
+app.use('*', (req, res) => {
+  res.status(404).send();
+});
+
 app.listen(PORT, () => {
   console.log(`Приложение слушает порт: ${PORT}`);
 });

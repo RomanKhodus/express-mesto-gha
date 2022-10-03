@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
+}, {
+  toObject: {
+    useProjection: true,
+    versionKey: false,
+  },
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
@@ -47,11 +52,6 @@ userSchema.statics.findUserByCredentials = function (email, password) {
         });
     });
 };
-
-userSchema.set('toObject', {
-  useProjection: true,
-  versionKey: false,
-});
 
 userSchema.path('avatar').validate((val) => {
   const linkRegex = /^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/;
