@@ -8,6 +8,7 @@ const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 process.on('uncaughtException', (err, origin) => {
   console.log(
@@ -22,6 +23,8 @@ const app = express();
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
+
+app.use(requestLogger); // подключаем логгер запросов
 
 app.use(bodyParser.json());
 
@@ -52,13 +55,17 @@ app.use('/', routerUsers);
 
 app.use('/', routerCards);
 
-app.use(errors());
+app.use(errorLogger); // подключаем логгер ошибок
 
+app.use(errors()); // Обработчик ошибок celebrate
+
+// централизованный обработчик ошибок
 app.use((err, req, res, next) => {
   res.status(err.statusCode).send({ message: err.message });
   next();
 });
 
+// Обработчик несуществующих роутов
 app.use('/', (req, res) => {
   res.status(404).send({ message: 'Сервер не может найти запрошенный ресурс' });
 });
