@@ -57,13 +57,21 @@ app.use('/', routerCards);
 app.use(errors()); // Обработчик ошибок celebrate
 
 // Обработчик несуществующих роутов
-app.use('/', (err, req, res, next) => {
+app.use('/', (req, res, next) => {
   next(new NotFoundError('Сервер не может найти запрошенный ресурс'));
 });
 
 // централизованный обработчик ошибок
 app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
   next();
 });
 
