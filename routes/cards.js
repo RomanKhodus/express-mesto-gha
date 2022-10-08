@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const { REG_EXP_URL } = require('../utils/constants');
 const {
   getCards,
   createCard,
@@ -13,7 +14,7 @@ router.get('/cards', getCards);
 router.post('/cards', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(/^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/),
+    link: Joi.string().required().pattern(REG_EXP_URL),
   }),
 }), createCard);
 

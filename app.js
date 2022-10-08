@@ -8,7 +8,8 @@ const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { REG_EXP_URL } = require('./utils/constants');
+const NotFoundError = require('./errors/not-found-errors');
 
 process.on('uncaughtException', (err, origin) => {
   console.log(
@@ -24,8 +25,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
-app.use(requestLogger); // подключаем логгер запросов
-
 app.use(bodyParser.json());
 
 app.post('/signin', celebrate({
@@ -39,7 +38,7 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(/^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/),
+    avatar: Joi.string().pattern(REG_EXP_URL),
     email: Joi.string().required().email({ tlds: { allow: false } }),
     password: Joi.string().required(),
   }),
@@ -55,19 +54,17 @@ app.use('/', routerUsers);
 
 app.use('/', routerCards);
 
-app.use(errorLogger); // подключаем логгер ошибок
-
 app.use(errors()); // Обработчик ошибок celebrate
+
+// Обработчик несуществующих роутов
+app.use('/', (err, req, res, next) => {
+  next(new NotFoundError('Сервер не может найти запрошенный ресурс'));
+});
 
 // централизованный обработчик ошибок
 app.use((err, req, res, next) => {
   res.status(err.statusCode).send({ message: err.message });
   next();
-});
-
-// Обработчик несуществующих роутов
-app.use('/', (req, res) => {
-  res.status(404).send({ message: 'Сервер не может найти запрошенный ресурс' });
 });
 
 app.listen(PORT, () => {

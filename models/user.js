@@ -1,11 +1,17 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
+// const { REG_EXP_URL } = require('../utils/constants'); // Регулярное выражение для проверки URL
 
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
     unique: true,
+    validate: {
+      validator: (v) => validator.isEmail(v),
+      message: 'некорректные данные Email',
+    },
   },
   password: {
     type: String,
@@ -27,6 +33,10 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'некорректные данные',
+    },
   },
 }, {
   toObject: {
@@ -53,9 +63,10 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     });
 };
 
-userSchema.path('avatar').validate((val) => {
-  const linkRegex = /^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/;
-  return linkRegex.test(val);
-}, 'Не корректные данные');
+// Проверка поля avatar c помощью регулярки
+// userSchema.path('avatar').validate((val) => {
+//   const linkRegex = REG_EXP_URL;
+//   return linkRegex.test(val);
+// }, 'Не корректные данные');
 
 module.exports = mongoose.model('user', userSchema);
