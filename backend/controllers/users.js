@@ -46,10 +46,10 @@ module.exports.createUser = (req, res, next) => {
       .then((user) => res.status(200).send(user.toObject()))
       .catch((err) => {
         if (err.code === 11000) {
-          next(new ConflictError('Такой пользователь уже существует'));
+          return next(new ConflictError('Такой пользователь уже существует'));
         }
         if (err.name === 'ValidationError') {
-          next(new BadRequestError('Некорректные данные'));
+          return next(new BadRequestError('Некорректные данные'));
         }
         return next(new InternalServerError('Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос'));
       });

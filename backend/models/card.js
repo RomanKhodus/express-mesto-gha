@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+// const { REG_EXP_URL } = require('../utils/constants');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -10,6 +12,10 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'некорректные данные',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -17,8 +23,7 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   likes: {
-    type: Array,
-    likesBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
     default: [],
   },
   createdAt: {
@@ -27,9 +32,9 @@ const cardSchema = new mongoose.Schema({
   },
 });
 
-cardSchema.path('link').validate((val) => {
-  const linkRegex = /^(https?:\/\/)?([\w].+)\.([a-z]{2,6}\.?)(\/[\w].*)*\/?$/;
-  return linkRegex.test(val);
-}, 'Неправильная ссылка');
+// Проверка ссылки на валидность с помощью регулярки
+// cardSchema.path('link').validate((val) => {
+//   REG_EXP_URL.test(val);
+// }, 'Неправильная ссылка');
 
 module.exports = mongoose.model('card', cardSchema);
